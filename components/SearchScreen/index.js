@@ -4,7 +4,7 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, Button, Dim
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
-
+import * as FileSystem from 'expo-file-system/legacy'
 const { width } = Dimensions.get('window');
 
 const cameraHeight = width * (4 / 3);
@@ -17,10 +17,32 @@ export default function SearchScreen({}) {
     const cameraRef = useRef(null);
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [cardName, setCardName] = useState(null);
-
+    const [base64Image, setBase64Image] = useState(null);
     // const toggleCameraFacing = () => {
     //     setFacing(current => (current === 'back' ? 'front' : 'back'));
     // };
+
+    const convertImageToBase64 = async (imageUri) => {
+        try {
+            if (!imageUri) return;
+            const base64Data = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64,});
+
+            const base64WithPrefix = `data:image/png;base64,${base64Data}`;
+            setBase64Image(base64WithPrefix);
+        } catch (error) {
+            console.error("erro ao converter imagem", error);
+        }
+    };
+
+    if (photo) {
+        console.log(base64Image, "gerado");
+        return (
+            <View style={styles.container}>
+
+                <Button title={`butao`} onPress={() => setPhoto(null)} />
+            </View>
+        )
+    }
 
     const handleActivateCamera = async () => {
         if (!permission || !permission.granted) {
@@ -44,9 +66,10 @@ export default function SearchScreen({}) {
 
     const takePicture = async () => {
         if (cameraRef.current) {
-            const options = { quality: 1, skipProcessing: false };
+            const options = { quality: 0.8, skipProcessing: false };
             const data = await cameraRef.current.takePictureAsync(options);
-            setPhoto(data.uri);
+            setPhoto(data.uri)
+            await convertImageToBase64(data.uri);
         }
     };
 
@@ -113,7 +136,7 @@ export default function SearchScreen({}) {
                         </TouchableOpacity>
                     )}
                 </View>
-                <TouchableOpacity
+                {isCameraActive && (<TouchableOpacity
                     style={styles.teste}
                     onPress={takePicture}
                 >
@@ -121,7 +144,8 @@ export default function SearchScreen({}) {
                         style={styles.imagePhoto}
                         source={require('../../assets/circulo.png')}
                     />
-                </TouchableOpacity>
+                </TouchableOpacity>)}
+
             </SafeAreaView>
         </View>
     );
