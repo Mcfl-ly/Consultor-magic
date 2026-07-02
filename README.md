@@ -37,7 +37,7 @@ Antes de começar, você vai precisar ter instalado em sua máquina:
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com
+   git clone https://github.com/Mcfl-ly/Consultor-magic
    ```
 
 2. **Entre na pasta do projeto:**
