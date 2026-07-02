@@ -25,6 +25,7 @@ O objetivo deste projeto é otimizar a experiência de jogadores de Magic: The G
 *   **Linguagem:** TypeScript / JavaScript
 *   **Inteligência Artificial:** [Google Gemini API](https://google.dev) (Utilizando modelos de texto e visão computacional multimodal)
 *   **Manipulação de Imagem:** [Expo Camera](https://expo.dev)
+*   **Conversão de Imagem para base64:** [Expo FileSystem](https://docs.expo.dev/versions/latest/sdk/filesystem/)
 
 ## 📋 Pré-requisitos
 
