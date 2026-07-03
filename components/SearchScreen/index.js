@@ -5,7 +5,31 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system/legacy'
+import {GoogleGenAI} from "@google/genai";
+
+
+// dotenv.config();
+// const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY
 const { width } = Dimensions.get('window');
+const ai = new GoogleGenAI({
+    apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY
+});
+
+async function gerarTexto(photo) {
+    try {
+        // Cria a interação utilizando o modelo padrão recomendado
+        const interaction = await ai.interactions.create({
+            model: 'gemini-3.5-flash',
+            input: `Explique a carta de Magic ${photo}.`,
+        });
+
+        // Exibe o resultado gerado no console
+        console.log('Resposta do Gemini:\n', interaction.output_text);
+    } catch (error) {
+        console.error('Erro ao chamar a API:', error);
+    }
+}
+
 
 const cameraHeight = width * (4 / 3);
 
@@ -35,7 +59,7 @@ export default function SearchScreen({}) {
     };
 
     if (photo) {
-        console.log(base64Image, "gerado");
+        console.log("base64 gerado");
         return (
             <View style={styles.container}>
 
@@ -69,6 +93,7 @@ export default function SearchScreen({}) {
             const options = { quality: 0.8, skipProcessing: false };
             const data = await cameraRef.current.takePictureAsync(options);
             setPhoto(data.uri)
+            await gerarTexto(base64Image)
             await convertImageToBase64(data.uri);
         }
     };
