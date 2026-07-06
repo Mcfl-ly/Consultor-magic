@@ -15,15 +15,27 @@ const ai = new GoogleGenAI({
     apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY
 });
 
-async function gerarTexto(photo) {
+async function gerarTexto(base64Image) {
     try {
-        // Cria a interação utilizando o modelo padrão recomendado
+        // Remove o prefixo data:image/png;base64, para a API processar os bytes puros
+        const base64Data = base64Image.split(',')[1];
+
         const interaction = await ai.interactions.create({
             model: 'gemini-3.5-flash',
-            input: `Explique a carta de Magic ${photo}.`,
+            // Passa um array de blocos de conteúdo para o input, separando texto e imagem
+            input: [
+                {
+                    type: 'text',
+                    text: 'Explique resumidamente a carta de Magic abaixo.',
+                },
+                {
+                    type: 'image',
+                    data: base64Data,
+                    mime_type: 'image/png'
+                }
+            ],
         });
 
-        // Exibe o resultado gerado no console
         console.log('Resposta do Gemini:\n', interaction.output_text);
     } catch (error) {
         console.error('Erro ao chamar a API:', error);
@@ -49,10 +61,15 @@ export default function SearchScreen({}) {
     const convertImageToBase64 = async (imageUri) => {
         try {
             if (!imageUri) return;
-            const base64Data = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64,});
+            const base64Data = await FileSystem.readAsStringAsync(imageUri, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
 
             const base64WithPrefix = `data:image/png;base64,${base64Data}`;
             setBase64Image(base64WithPrefix);
+
+            // Chama a IA aqui para garantir que a variável não seja null
+            await gerarTexto(base64WithPrefix);
         } catch (error) {
             console.error("erro ao converter imagem", error);
         }
@@ -92,8 +109,10 @@ export default function SearchScreen({}) {
         if (cameraRef.current) {
             const options = { quality: 0.8, skipProcessing: false };
             const data = await cameraRef.current.takePictureAsync(options);
-            setPhoto(data.uri)
-            await gerarTexto(base64Image)
+
+            setPhoto(data.uri);
+
+            // Aguarda a conversão terminar antes de chamar o Gemini
             await convertImageToBase64(data.uri);
         }
     };
