@@ -1,47 +1,40 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, Button, Dimensions } from 'react-native';
+import { ScrollView,StyleSheet, Text, View, TouchableOpacity, TextInput, Image, Button, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system/legacy'
-import {GoogleGenAI} from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
-
-// dotenv.config();
-// const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY
 const { width } = Dimensions.get('window');
 const ai = new GoogleGenAI({
     apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY
 });
 
-async function gerarTexto(base64Image) {
+async function gerarTexto(base64ImagePuro) {
     try {
-        // Remove o prefixo data:image/png;base64, para a API processar os bytes puros
-        const base64Data = base64Image.split(',')[1];
-
         const interaction = await ai.interactions.create({
             model: 'gemini-3.5-flash',
-            // Passa um array de blocos de conteúdo para o input, separando texto e imagem
             input: [
                 {
                     type: 'text',
-                    text: 'Explique resumidamente a carta de Magic abaixo.',
+                    text: 'Explique a carta de Magic abaixo de forma simples e casual como se tivesse explicando para um iniciante, e sem toda a pontuação que torne o texto estranho, como utilizar {} e * no seguinte formato:\nlinha 1: titulo\nlinha 2: custo\nproximas linhas: efeitos da carta.',
                 },
                 {
                     type: 'image',
-                    data: base64Data,
+                    data: base64ImagePuro,
                     mime_type: 'image/png'
                 }
             ],
         });
 
-        console.log('Resposta do Gemini:\n', interaction.output_text);
+        return interaction.output_text || interaction.text || "Estrutura de resposta inesperada.";
     } catch (error) {
-        console.error('Erro ao chamar a API:', error);
+        console.error('Erro crítico ao chamar a API Gemini:', error);
+        return `Erro na API: ${error.message || error}`;
     }
 }
-
 
 const cameraHeight = width * (4 / 3);
 
@@ -53,37 +46,28 @@ export default function SearchScreen({}) {
     const cameraRef = useRef(null);
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [cardName, setCardName] = useState(null);
-    const [base64Image, setBase64Image] = useState(null);
-    // const toggleCameraFacing = () => {
-    //     setFacing(current => (current === 'back' ? 'front' : 'back'));
-    // };
+    const [cardText, setCardText] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const convertImageToBase64 = async (imageUri) => {
         try {
-            if (!imageUri) return;
+            // Ler como base64 puro
             const base64Data = await FileSystem.readAsStringAsync(imageUri, {
                 encoding: FileSystem.EncodingType.Base64,
             });
 
-            const base64WithPrefix = `data:image/png;base64,${base64Data}`;
-            setBase64Image(base64WithPrefix);
+            // Envia o base64 puro diretamente para a função da IA
+            const resultadoIA = await gerarTexto(base64Data);
 
-            // Chama a IA aqui para garantir que a variável não seja null
-            await gerarTexto(base64WithPrefix);
+            // Define o texto na tela (seja sucesso ou a string de erro tratada no catch)
+            setCardText(resultadoIA);
         } catch (error) {
             console.error("erro ao converter imagem", error);
+            setCardText("Erro ao processar o arquivo da imagem.");
+        } finally {
+            setIsLoading(false);
         }
     };
-
-    if (photo) {
-        console.log("base64 gerado");
-        return (
-            <View style={styles.container}>
-
-                <Button title={`butao`} onPress={() => setPhoto(null)} />
-            </View>
-        )
-    }
 
     const handleActivateCamera = async () => {
         if (!permission || !permission.granted) {
@@ -95,25 +79,25 @@ export default function SearchScreen({}) {
             setIsCameraActive(true);
         }
     };
-        // EXIBE A FOTO AQUI
-    // if (photo) {
-    //     return (
-    //         <View style={styles.container}>
-    //             <Image source={{ uri: photo }} style={styles.cameraPreview} />
-    //             <Button title="Tirar outra foto" onPress={() => setPhoto(null)} />
-    //         </View>
-    //     );
-    // }
 
     const takePicture = async () => {
         if (cameraRef.current) {
-            const options = { quality: 0.8, skipProcessing: false };
-            const data = await cameraRef.current.takePictureAsync(options);
+            try {
+                setIsLoading(true);
 
-            setPhoto(data.uri);
+                const options = { quality: 0.8, skipProcessing: false };
+                const data = await cameraRef.current.takePictureAsync(options);
 
-            // Aguarda a conversão terminar antes de chamar o Gemini
-            await convertImageToBase64(data.uri);
+                setPhoto(data.uri);
+                setIsCameraActive(false);
+
+                // Dispara a conversão e chamada do Gemini
+                await convertImageToBase64(data.uri);
+            } catch (error) {
+                console.error("Erro ao tirar foto:", error);
+                setCardText("Não foi possível capturar a foto da câmera.");
+                setIsLoading(false);
+            }
         }
     };
 
@@ -121,90 +105,111 @@ export default function SearchScreen({}) {
         <View style={styles.container}>
             <StatusBar style="light" />
 
-            {isCameraActive && (
-                <View style={styles.cameraWrapper}>
-                    <CameraView
-                        style={styles.cameraViewComponent}
-                        facing={facing}
-                        ref={cameraRef}
-                        mode="picture"
-                        responsiveOrientationWhenOrientationChanged={true}
-                    />
-                </View>
-            )}
-
-            <SafeAreaView style={styles.overlayContainer}>
-                <View style={styles.inputView}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => {
-                            if (isCameraActive) {
-                                setIsCameraActive(false);
-                            } else {
-                                navigation.goBack();
-                            }
-                        }}
-                    >
-                        <Text style={styles.backButtonText}>✕</Text>
-                    </TouchableOpacity>
-
-                    <TextInput
-                        placeholder={'Carta'}
-                        placeholderTextColor={'rgba(255,255,255,0.6)'}
-                        style={styles.input}
-                        onChangeText={setCardName}
-                    />
-
-                    {!cardName ? (
-                        <TouchableOpacity
-                            style={styles.buttonAction}
-                            onPress={handleActivateCamera}
-                        >
-                            <Image
-                                style={styles.image}
-                                source={require('../../assets/camera.png')}
-                            />
-                        </TouchableOpacity>
+            {photo ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    {isLoading ? (
+                        <Text style={styles.text}>Analisando sua carta...</Text>
                     ) : (
-                        <TouchableOpacity
-                            style={styles.okButton}
-                            onPress={() => {
-                                if (isCameraActive) {
-                                    setIsCameraActive(false);
-                                } else {
-                                    navigation.goBack();
-                                }
-                            }}
-                        >
-                            <Text style={styles.okButtonText}>OK</Text>
-                        </TouchableOpacity>
+                        <ScrollView style={{  }}>
+                            <Text style={styles.text}>{cardText || "Nenhum texto retornado."}</Text>
+                            <Button
+                                title="Tirar outra foto"
+                                onPress={() => {
+                                    setPhoto(null);
+                                    setCardText(null);
+                                }}
+                            />
+                        </ScrollView>
                     )}
                 </View>
-                {isCameraActive && (<TouchableOpacity
-                    style={styles.teste}
-                    onPress={takePicture}
-                >
-                    <Image
-                        style={styles.imagePhoto}
-                        source={require('../../assets/circulo.png')}
-                    />
-                </TouchableOpacity>)}
+            ) : (
+                <>
+                    {isCameraActive && (
+                        <View style={styles.cameraWrapper}>
+                            <CameraView
+                                style={styles.cameraViewComponent}
+                                facing={facing}
+                                ref={cameraRef}
+                                mode="picture"
+                                responsiveOrientationWhenOrientationChanged={true}
+                            />
+                        </View>
+                    )}
 
-            </SafeAreaView>
+                    <SafeAreaView style={styles.overlayContainer}>
+                        <View style={styles.inputView}>
+                            <TouchableOpacity
+                                style={styles.backButton}
+                                onPress={() => {
+                                    if (isCameraActive) {
+                                        setIsCameraActive(false);
+                                    } else {
+                                        navigation.goBack();
+                                    }
+                                }}
+                            >
+                                <Text style={styles.backButtonText}>✕</Text>
+                            </TouchableOpacity>
+
+                            <TextInput
+                                placeholder={'Carta'}
+                                placeholderTextColor={'rgba(255,255,255,0.6)'}
+                                style={styles.input}
+                                onChangeText={setCardName}
+                            />
+
+                            {!cardName ? (
+                                <TouchableOpacity
+                                    style={styles.buttonAction}
+                                    onPress={handleActivateCamera}
+                                >
+                                    <Image
+                                        style={styles.image}
+                                        source={require('../../assets/camera.png')}
+                                    />
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity
+                                    style={styles.okButton}
+                                    onPress={() => {
+                                        if (isCameraActive) {
+                                            setIsCameraActive(false);
+                                        } else {
+                                            navigation.goBack();
+                                        }
+                                    }}
+                                >
+                                    <Text style={styles.okButtonText}>OK</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                        {isCameraActive && (
+                            <TouchableOpacity style={styles.teste} onPress={takePicture}>
+                                <Image
+                                    style={styles.imagePhoto}
+                                    source={require('../../assets/circulo.png')}
+                                />
+                            </TouchableOpacity>
+                        )}
+                    </SafeAreaView>
+                </>
+            )}
         </View>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'black',
-        justifyContent: 'center', // Centraliza a caixa da câmera verticalmente na tela
+        justifyContent: 'center',
     },
     cameraWrapper: {
         position: 'absolute',
         width: width,
-        height: cameraHeight, // Força a proporção real 4:3
+        height: cameraHeight,
         overflow: 'hidden',
         alignSelf: 'center',
         zIndex: 1,
@@ -216,9 +221,12 @@ const styles = StyleSheet.create({
         bottom: 35,
         alignSelf: 'center',
         zIndex: 10,
-
-
-
+    },
+    text: {
+        color: 'white',
+        fontSize: 20,
+        lineHeight: 40,
+        marginBottom: 100,
     },
     cameraViewComponent: {
         flex: 1,
