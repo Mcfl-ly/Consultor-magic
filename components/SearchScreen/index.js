@@ -35,6 +35,25 @@ async function gerarTexto(base64ImagePuro) {
         return `Erro na API: ${error.message || error}`;
     }
 }
+async function buscarTexto(card) {
+    try {
+        const interaction = await ai.interactions.create({
+            model: 'gemini-3.5-flash',
+            input: [
+                {
+                    type: 'text',
+                    text: `Explique a carta de Magic ${card} de forma simples e casual como se tivesse explicando para um iniciante, e sem toda a pontuação que torne o texto estranho, como utilizar {} e * no seguinte formato:\nlinha 1: titulo\nlinha 2: custo\nproximas linhas: efeitos da carta.`,
+                },
+            ],
+        });
+
+        return interaction.output_text || interaction.text || "Estrutura de resposta inesperada.";
+    } catch (error) {
+        console.error('Erro crítico ao chamar a API Gemini:', error);
+        return `Erro na API: ${error.message || error}`;
+    }
+}
+
 
 const cameraHeight = width * (4 / 3);
 
@@ -48,6 +67,28 @@ export default function SearchScreen({}) {
     const [cardName, setCardName] = useState(null);
     const [cardText, setCardText] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [okOn, setOkOn] = useState(false);
+    const [textIsFull, setTextIsFull] = useState(false);
+
+    // const returnName = async () => {
+    //     console.log(cardName);
+    // }
+    const searchByName = async () => {
+
+        try {
+            setTextIsFull(true);
+            setIsLoading(true);
+            const resultIA = await buscarTexto(cardName);
+            console.log(resultIA);
+            setCardText(resultIA);
+        } catch (error) {
+            console.error("erro com o nome da carta", error);
+            setCardText("Erro ao processar o nome da carta.");
+        } finally {
+            setIsLoading(false);
+        }
+        };
+
 
     const convertImageToBase64 = async (imageUri) => {
         try {
@@ -105,7 +146,7 @@ export default function SearchScreen({}) {
         <View style={styles.container}>
             <StatusBar style="light" />
 
-            {photo ? (
+            {photo || textIsFull ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                     {isLoading ? (
                         <Text style={styles.text}>Analisando sua carta...</Text>
@@ -113,10 +154,11 @@ export default function SearchScreen({}) {
                         <ScrollView style={{  }}>
                             <Text style={styles.text}>{cardText || "Nenhum texto retornado."}</Text>
                             <Button
-                                title="Tirar outra foto"
+                                title="Buscar outra carta"
                                 onPress={() => {
                                     setPhoto(null);
                                     setCardText(null);
+                                    setTextIsFull(false);
                                 }}
                             />
                         </ScrollView>
@@ -155,10 +197,13 @@ export default function SearchScreen({}) {
                                 placeholder={'Carta'}
                                 placeholderTextColor={'rgba(255,255,255,0.6)'}
                                 style={styles.input}
-                                onChangeText={setCardName}
+                                onChangeText={(text) => {
+                                    setCardName(text);
+                                    setOkOn(true);
+                                }}
                             />
 
-                            {!cardName ? (
+                            {!okOn ? (
                                 <TouchableOpacity
                                     style={styles.buttonAction}
                                     onPress={handleActivateCamera}
@@ -171,13 +216,7 @@ export default function SearchScreen({}) {
                             ) : (
                                 <TouchableOpacity
                                     style={styles.okButton}
-                                    onPress={() => {
-                                        if (isCameraActive) {
-                                            setIsCameraActive(false);
-                                        } else {
-                                            navigation.goBack();
-                                        }
-                                    }}
+                                    onPress={searchByName}
                                 >
                                     <Text style={styles.okButtonText}>OK</Text>
                                 </TouchableOpacity>
