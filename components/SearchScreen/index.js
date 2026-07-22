@@ -6,6 +6,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system/legacy'
 import { GoogleGenAI } from "@google/genai";
+import TextRecognition from "@react-native-ml-kit/text-recognition";
 
 const { width } = Dimensions.get('window');
 const ai = new GoogleGenAI({
@@ -132,8 +133,9 @@ export default function SearchScreen({}) {
                 setPhoto(data.uri);
                 setIsCameraActive(false);
 
-                // Dispara a conversão e chamada do Gemini
-                await convertImageToBase64(data.uri);
+                // Dispara o reconhecimento do texto
+                const textResult = await TextRecognition.recognize(data.uri);
+                console.log(textResult.text);
             } catch (error) {
                 console.error("Erro ao tirar foto:", error);
                 setCardText("Não foi possível capturar a foto da câmera.");
