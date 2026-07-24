@@ -4,7 +4,6 @@ import { ScrollView,StyleSheet, Text, View, TouchableOpacity, TextInput, Image, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
-import * as FileSystem from 'expo-file-system/legacy'
 import { GoogleGenAI } from "@google/genai";
 import TextRecognition from "@react-native-ml-kit/text-recognition";
 
@@ -13,29 +12,6 @@ const ai = new GoogleGenAI({
     apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY
 });
 
-async function gerarTexto(base64ImagePuro) {
-    try {
-        const interaction = await ai.interactions.create({
-            model: 'gemini-3.5-flash',
-            input: [
-                {
-                    type: 'text',
-                    text: 'Explique a carta de Magic abaixo de forma simples e casual como se tivesse explicando para um iniciante, e sem toda a pontuação que torne o texto estranho, como utilizar {} e * no seguinte formato:\nlinha 1: titulo\nlinha 2: custo\nproximas linhas: efeitos da carta.',
-                },
-                {
-                    type: 'image',
-                    data: base64ImagePuro,
-                    mime_type: 'image/png'
-                }
-            ],
-        });
-
-        return interaction.output_text || interaction.text || "Estrutura de resposta inesperada.";
-    } catch (error) {
-        console.error('Erro crítico ao chamar a API Gemini:', error);
-        return `Erro na API: ${error.message || error}`;
-    }
-}
 async function buscarTexto(card) {
     try {
         const interaction = await ai.interactions.create({
@@ -43,12 +19,13 @@ async function buscarTexto(card) {
             input: [
                 {
                     type: 'text',
-                    text: `Explique a carta de Magic ${card} de forma simples e casual como se tivesse explicando para um iniciante, e sem toda a pontuação que torne o texto estranho, como utilizar {} e * no seguinte formato:\nlinha 1: titulo\nlinha 2: custo\nproximas linhas: efeitos da carta.`,
+                    text: `resuma brevemente em até 100 caracteres a carta de magic ${card} `,
                 },
             ],
         });
-
+        console.log(interaction.output_text);
         return interaction.output_text || interaction.text || "Estrutura de resposta inesperada.";
+
     } catch (error) {
         console.error('Erro crítico ao chamar a API Gemini:', error);
         return `Erro na API: ${error.message || error}`;
@@ -62,7 +39,6 @@ export default function SearchScreen({}) {
     const navigation = useNavigation();
     const [facing, setFacing] = useState('back');
     const [permission, requestPermission] = useCameraPermissions();
-    const [photo, setPhoto] = useState(null);
     const cameraRef = useRef(null);
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [cardName, setCardName] = useState(null);
@@ -71,11 +47,7 @@ export default function SearchScreen({}) {
     const [okOn, setOkOn] = useState(false);
     const [textIsFull, setTextIsFull] = useState(false);
 
-    // const returnName = async () => {
-    //     console.log(cardName);
-    // }
     const searchByName = async () => {
-
         try {
             setTextIsFull(true);
             setIsLoading(true);
@@ -89,27 +61,6 @@ export default function SearchScreen({}) {
             setIsLoading(false);
         }
         };
-
-
-    const convertImageToBase64 = async (imageUri) => {
-        try {
-            // Ler como base64 puro
-            const base64Data = await FileSystem.readAsStringAsync(imageUri, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
-
-            // Envia o base64 puro diretamente para a função da IA
-            const resultadoIA = await gerarTexto(base64Data);
-
-            // Define o texto na tela (seja sucesso ou a string de erro tratada no catch)
-            setCardText(resultadoIA);
-        } catch (error) {
-            console.error("erro ao converter imagem", error);
-            setCardText("Erro ao processar o arquivo da imagem.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleActivateCamera = async () => {
         if (!permission || !permission.granted) {
@@ -129,16 +80,19 @@ export default function SearchScreen({}) {
 
                 const options = { quality: 0.8, skipProcessing: false };
                 const data = await cameraRef.current.takePictureAsync(options);
-
-                setPhoto(data.uri);
                 setIsCameraActive(false);
-
+                setTextIsFull(true);
                 // Dispara o reconhecimento do texto
                 const textResult = await TextRecognition.recognize(data.uri);
-                console.log(textResult.text);
+                const strings = textResult.text.split('\n');
+                const resultPhoto = await buscarTexto(strings[0])
+                setCardText(resultPhoto);
+
             } catch (error) {
                 console.error("Erro ao tirar foto:", error);
                 setCardText("Não foi possível capturar a foto da câmera.");
+                setIsLoading(false);
+            } finally {
                 setIsLoading(false);
             }
         }
@@ -148,7 +102,7 @@ export default function SearchScreen({}) {
         <View style={styles.container}>
             <StatusBar style="light" />
 
-            {photo || textIsFull ? (
+            {textIsFull ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                     {isLoading ? (
                         <Text style={styles.text}>Analisando sua carta...</Text>
@@ -201,7 +155,7 @@ export default function SearchScreen({}) {
                                 style={styles.input}
                                 onChangeText={(text) => {
                                     setCardName(text);
-                                    setOkOn(true);
+                                    setOkOn(text.trim().length > 0);
                                 }}
                             />
 
@@ -238,8 +192,6 @@ export default function SearchScreen({}) {
         </View>
     );
 }
-
-
 
 const styles = StyleSheet.create({
     container: {
