@@ -14,10 +14,10 @@ export default function HomeScreen({navigation}) {
                 <Text style={styles.textButtons}>Search</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('DeckScreen')}
+            <TouchableOpacity onPress={() => navigation.navigate('AllDecks')}
                               style={styles.scrButtons}
             >
-                <Text style={styles.textButtons}>Deck</Text>
+                <Text style={styles.textButtons}>Decks</Text>
             </TouchableOpacity>
 
             <StatusBar></StatusBar>

@@ -9,7 +9,8 @@
           "recordAudioAndroid": true,
           "barcodeScannerEnabled": true
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "name": "magic",
     "slug": "magic",

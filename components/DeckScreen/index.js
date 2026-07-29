@@ -47,7 +47,11 @@ const ai = new GoogleGenAI({
 
 const cameraHeight = width * (4 / 3);
 
-export default function SearchScreen({}) {
+export default function SearchScreen({ route }) {
+
+    const {deckName} = route.params;
+
+
     const navigation = useNavigation();
     const [facing, setFacing] = useState('back');
     const [permission, requestPermission] = useCameraPermissions();
@@ -117,7 +121,9 @@ export default function SearchScreen({}) {
         setIsCameraActive(true);
     };
 
+    const addCardToDb = () => {
 
+    }
     return (
         <View style={styles.container}>
             <StatusBar style="light" />
@@ -204,15 +210,7 @@ export default function SearchScreen({}) {
                             <Text style={styles.backButtonText}>✕</Text>
                         </TouchableOpacity>
 
-                        <TextInput
-                            placeholder="Carta"
-                            placeholderTextColor="rgba(255,255,255,0.6)"
-                            style={styles.input}
-                            onChangeText={(text) => {
-                                setCardName(text);
-                                setOkOn(text.trim().length > 0);
-                            }}
-                        />
+                        <Text style={{color: "white", fontSize: 20}}>{deckName}</Text>
 
                         {!okOn ? (
                             <TouchableOpacity
