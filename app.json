@@ -12,8 +12,8 @@
       ],
       "expo-sqlite"
     ],
-    "name": "magic",
-    "slug": "magic",
+    "name": "DeckMind",
+    "slug": "DeckMind",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

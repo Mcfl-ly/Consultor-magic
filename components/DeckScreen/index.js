@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState, useRef } from 'react';
+import {useState, useRef, useCallback} from 'react';
 import {
     ScrollView,
     Modal,
@@ -15,35 +15,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useNavigation } from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import { GoogleGenAI } from "@google/genai";
 import TextRecognition from "@react-native-ml-kit/text-recognition";
+import * as SQLite from "expo-sqlite";
 
 const { width } = Dimensions.get('window');
 const ai = new GoogleGenAI({
     apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY
 });
 
-// async function buscarTexto(card) {
-//     try {
-//         const interaction = await ai.interactions.create({
-//             model: 'gemini-3.5-flash',
-//             input: [
-//                 {
-//                     type: 'text',
-//                     text: `resuma brevemente em até 100 caracteres a carta de magic ${card} `,
-//                 },
-//             ],
-//         });
-//         console.log(interaction.output_text);
-//         return interaction.output_text || interaction.text || "Estrutura de resposta inesperada.";
-//
-//     } catch (error) {
-//         console.error('Erro crítico ao chamar a API Gemini:', error);
-//         return `Erro na API: ${error.message || error}`;
-//     }
-// }
-
+export const db = SQLite.openDatabaseSync("decks")
 
 const cameraHeight = width * (4 / 3);
 
@@ -64,6 +46,54 @@ export default function SearchScreen({ route }) {
     const [cards, setCards] = useState([]);
     const [previewPhoto, setPreviewPhoto] = useState(null);
     const [qtd, setQtd] = useState(1);
+    const [deletedCard, setDeletedCard] = useState('');
+    const [showMenu, setShowMenu] = useState(false);
+    useFocusEffect(
+        useCallback(() => {
+            listarCartas();
+        }, [])
+    );
+
+
+    async function insertCards(nomeDeck, cards) {
+        try {
+            console.log("carta:", JSON.stringify(cards))
+            await db.withTransactionAsync(async () => {
+                for (const card of cards) {
+                    console.log("Carta recebida:", card);
+                    await db.runAsync(
+                        `INSERT INTO "${nomeDeck}" (nome, quantidade, uri)
+                     VALUES (?, ?, ?)
+                     ON CONFLICT(nome)
+                     DO NOTHING;`,
+                        [
+                            card.name,
+                            card.qtd,
+                            card.photo
+                        ]
+                    );
+                }
+            });
+
+        } catch (error) {
+            console.error("Erro ao inserir cartas:", error);
+        }
+    }
+
+    async function listarCartas() {
+        try {
+            const resultado = await db.getAllAsync(`SELECT * FROM "${deckName}"`);
+            setCards(resultado.map(item => ({
+                name: item.nome,
+                photo: item.uri,
+                qtd: item.quantidade,
+            })));
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     const handleActivateCamera = async () => {
         if (!permission || !permission.granted) {
@@ -121,8 +151,18 @@ export default function SearchScreen({ route }) {
         setIsCameraActive(true);
     };
 
-    const addCardToDb = () => {
+    async function deleteCard() {
+        const newCards = cards.filter(card => card.name !== deletedCard);
+        setCards(newCards);
 
+        try {
+            await db.runAsync(`DELETE FROM "${deckName}" WHERE nome = "${deletedCard}"`);
+            setShowMenu(false);
+        } catch (error) {
+            console.error(error);
+        }
+
+        console.log(cards)
     }
     return (
         <View style={styles.container}>
@@ -236,16 +276,51 @@ export default function SearchScreen({ route }) {
                         {cards.map((card, index) => (
                             <View key={index} style={styles.cardsView}>
                                 <TouchableOpacity
+                                    onLongPress={() => {
+                                        setDeletedCard(card.name)
+                                        setShowMenu(true)
+                                    }}
                                     onPress={() => setSelectedCard(card)}
+                                    delayLongPress={600}
                                 >
                                     <Text style={styles.text}>
                                         {card.name}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
-                        ))}
-                    </ScrollView>
 
+                        ))}
+
+                    </ScrollView>
+                    <Modal
+                        visible={showMenu}
+                        transparent
+                        animationType="fade">
+
+                        <View
+                            style={styles.overlayCard}>
+
+                            <View style={styles.menu}>
+                                <Text style={styles.title}>{deletedCard}</Text>
+
+                                <TouchableOpacity onPress={() => {
+                                    deleteCard();}}>
+                                    <Text style={styles.renameDelCancel}>Excluir</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={() => setShowMenu(false)}>
+                                    <Text style={styles.renameDelCancel}>Cancelar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => {
+                            insertCards(deckName, cards)
+                        }}>
+                        <Text style={styles.text}>Salvar</Text>
+                    </TouchableOpacity>
                     <Modal
                         visible={selectedCard !== null}
                         transparent
@@ -265,7 +340,7 @@ export default function SearchScreen({ route }) {
                                     />
 
                                     <Image
-                                        source={{ uri: selectedCard.photo }}
+                                        source={{ uri: selectedCard.photo}}
                                         style={styles.image}
                                         resizeMode="contain"
                                     />
@@ -289,6 +364,13 @@ const styles = StyleSheet.create({
     previewImage: {
         flex: 1,
         width: "100%",
+    },
+    addButton: {
+        marginBottom: 30,
+        borderWidth: 1,
+        borderColor: "white",
+        width: "50%",
+        alignSelf: "center",
     },
     previewButtons: {
         flexDirection: "row",
@@ -450,4 +532,38 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'black',
     },
-});
+    renameDelCancel: {
+        alignSelf: 'center',
+        fontSize: 20,
+        padding: 10,
+        borderWidth: 2,
+        borderRadius: 10,
+        marginBottom: 15,
+    },
+    title: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        alignSelf: 'center',
+        marginBottom: 20,
+    },
+        menu: {
+            width: 250,
+            backgroundColor: '#fff',
+            borderRadius: 12,
+            padding: 20,
+            elevation: 5,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+        },
+    overlayCard: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    }}
+    );
