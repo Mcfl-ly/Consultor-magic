@@ -48,7 +48,7 @@ Assim, o jogador pode consultar a composição completa de seus decks a qualquer
 
 ### 🎥 Demonstração
 
-> **(Adicionar GIF do gerenciamento de decks aqui)**
+> **![Demonstração do DeckMind](assets/salva.gif)**
 
 ---
 
