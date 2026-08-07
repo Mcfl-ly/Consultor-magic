@@ -13,6 +13,7 @@
     <img src="https://img.shields.io/badge/LinkedIn-Perfil-0A66C2?style=for-the-badge&logo=linkedin">
   </a>
 </p>
+
 # 🃏 DeckMind
 
 DeckMind é um aplicativo mobile desenvolvido para jogadores de **Magic: The Gathering**, especialmente para quem está começando no jogo.
