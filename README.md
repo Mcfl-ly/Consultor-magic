@@ -1,15 +1,9 @@
-# 🃏 DeckMind
-
-Aplicativo mobile desenvolvido para jogadores de Magic: The Gathering que utiliza IA para identificar cartas, resumir seus efeitos e organizar decks.
-
-## Tecnologias
-
 ![React Native](https://img.shields.io/badge/React%20Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75FF?style=for-the-badge&logo=googlegemini&logoColor=white)
-
+![OCR](https://img.shields.io/badge/OCR-4285F4?style=for-the-badge&logo=googlelens&logoColor=white)
 # 🃏 DeckMind
 
 DeckMind é um aplicativo mobile desenvolvido para jogadores de **Magic: The Gathering**, especialmente para quem está começando no jogo.
