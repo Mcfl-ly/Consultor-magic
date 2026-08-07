@@ -12,11 +12,11 @@ O aplicativo utiliza **Inteligência Artificial** para simplificar o entendiment
 
 ---
 <p align="center">
-  <a href="https://github.com/SEU-USUARIO/DeckMind/releases/latest">
+  <a href="https://github.com/Mcfl-ly/Consultor-magic/releases/tag/v1.0">
     <img src="https://img.shields.io/badge/⬇️_Download_APK-success?style=for-the-badge">
   </a>
 
-  <a href="https://www.linkedin.com/in/SEU-LINKEDIN">
+  <a href="https://www.linkedin.com/in/paulo-gabriel-lima-santos-0a4044372/">
     <img src="https://img.shields.io/badge/LinkedIn-Perfil-0A66C2?style=for-the-badge&logo=linkedin">
   </a>
 </p>
