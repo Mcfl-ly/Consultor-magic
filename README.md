@@ -14,11 +14,176 @@
 
 Aplicativo mobile para jogadores de **Magic: The Gathering** que utiliza **OCR** e **Gemini AI** para simplificar a leitura de cartas e auxiliar no gerenciamento de decks.
 
+# 🃏 DeckMind
 
-![GitHub last commit](https://img.shields.io/github/last-commit/SEU-USUARIO/DeckMind?style=for-the-badge)
+DeckMind é um aplicativo mobile desenvolvido para jogadores de **Magic: The Gathering**, especialmente para quem está começando no jogo.
 
-![GitHub Repo stars](https://img.shields.io/github/stars/SEU-USUARIO/DeckMind?style=for-the-badge)
+O aplicativo utiliza **Inteligência Artificial** para simplificar o entendimento das cartas e permite que o usuário mantenha seus decks organizados diretamente no celular.
 
-![GitHub forks](https://img.shields.io/github/forks/SEU-USUARIO/DeckMind?style=for-the-badge)
+---
 
-![GitHub issues](https://img.shields.io/github/issues/SEU-USUARIO/DeckMind?style=for-the-badge)
+## 📱 Funcionalidades
+
+### 🤖 Resumo inteligente de cartas
+
+Entender o texto de uma carta de Magic pode ser desafiador para novos jogadores. Pensando nisso, o DeckMind permite pesquisar qualquer carta e receber um resumo simples e objetivo gerado por IA.
+
+O usuário pode realizar a pesquisa de duas formas:
+
+* 📷 Tirando uma foto da carta
+* ⌨️ Digitando o nome da carta
+
+Quando uma imagem é utilizada, o aplicativo emprega **OCR (Reconhecimento Óptico de Caracteres)** para identificar o nome da carta. Em seguida, esse nome é enviado para a **Gemini AI**, juntamente com um prompt cuidadosamente elaborado para retornar uma explicação breve e fácil de entender.
+
+### 🎥 Demonstração
+
+> **(Adicionar GIF da pesquisa de cartas aqui)**
+
+---
+
+### 📚 Gerenciamento de Decks
+
+O DeckMind também permite que o usuário mantenha seus decks organizados no próprio dispositivo.
+
+Com essa funcionalidade é possível:
+
+* Criar novos decks
+* Definir um nome para cada deck
+* Adicionar cartas utilizando a câmera
+* Definir a quantidade de cada carta
+* Remover cartas do deck
+* Visualizar todas as cartas cadastradas
+
+Assim, o jogador pode consultar a composição completa de seus decks a qualquer momento.
+
+### 🎥 Demonstração
+
+> **(Adicionar GIF do gerenciamento de decks aqui)**
+
+---
+
+## 🚀 Tecnologias Utilizadas
+
+* React Native
+* Expo
+* TypeScript
+* SQLite
+* Gemini AI
+* OCR (Reconhecimento Óptico de Caracteres)
+
+---
+
+## 🛠️ Como Executar o Projeto
+
+### Pré-requisitos
+
+* Node.js
+* npm ou yarn
+* Expo CLI
+* Android Studio ou dispositivo físico
+
+### Clone o repositório
+
+```bash
+git clone https://github.com/SEU-USUARIO/DeckMind.git
+
+cd DeckMind
+```
+
+### Instale as dependências
+
+```bash
+npm install
+```
+
+ou
+
+```bash
+yarn
+```
+
+### Configure as variáveis de ambiente
+
+Crie um arquivo chamado `.env` na raiz do projeto:
+
+```env
+EXPO_PUBLIC_GEMINI_API_KEY=SUA_CHAVE_DA_API
+```
+
+Substitua `SUA_CHAVE_DA_API` pela chave obtida no Google AI Studio.
+
+### Execute o projeto
+
+```bash
+npx expo start
+```
+
+---
+
+## 📦 Instalação do Aplicativo
+
+Caso você queira apenas utilizar o aplicativo, basta baixar o APK disponível abaixo:
+
+> **🔗 (Adicionar link para download do APK aqui)**
+
+---
+
+## 🧠 Como Funciona
+
+### Pesquisa de Cartas
+
+1. O usuário tira uma foto da carta ou digita seu nome.
+2. Caso seja utilizada uma imagem, o OCR identifica o nome da carta.
+3. O nome é enviado para a Gemini AI.
+4. A IA retorna um resumo simples explicando a função da carta.
+
+### Gerenciamento de Decks
+
+1. O usuário cria um novo deck.
+2. Define um nome.
+3. Adiciona cartas utilizando a câmera.
+4. Informa a quantidade de cada carta.
+5. O aplicativo salva todas as informações localmente utilizando SQLite.
+6. O deck pode ser consultado posteriormente sempre que necessário.
+
+---
+
+## 💾 Armazenamento
+
+Todas as informações dos decks são armazenadas localmente utilizando **SQLite**, permitindo que o usuário acesse sua coleção mesmo sem conexão com a internet.
+
+A única funcionalidade que necessita de acesso à internet é a consulta de cartas utilizando a **Gemini AI**.
+
+---
+
+## 🔮 Próximas Funcionalidades
+
+O projeto ainda está em desenvolvimento. Algumas melhorias planejadas incluem:
+
+* Análise completa do deck utilizando Inteligência Artificial.
+* Sugestões para melhorar a construção do deck.
+* Interface mais moderna e intuitiva.
+* Melhorias na experiência do usuário.
+* Otimizações de desempenho.
+
+---
+
+## 🤝 Contribuições
+
+Sugestões, melhorias e contribuições são sempre bem-vindas.
+
+Caso encontre algum problema ou tenha alguma ideia para o projeto, fique à vontade para abrir uma **Issue** ou enviar um **Pull Request**.
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a licença MIT.
+
+---
+
+## 👨‍💻 Autor
+
+**Paulo Gabriel Lima Santos**
+
+Desenvolvedor de Software Júnior apaixonado por desenvolvimento mobile, backend e Inteligência Artificial.
