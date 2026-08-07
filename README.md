@@ -4,13 +4,6 @@
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75FF?style=for-the-badge&logo=googlegemini&logoColor=white)
 ![OCR](https://img.shields.io/badge/OCR-4285F4?style=for-the-badge&logo=googlelens&logoColor=white)
-# 🃏 DeckMind
-
-DeckMind é um aplicativo mobile desenvolvido para jogadores de **Magic: The Gathering**, especialmente para quem está começando no jogo.
-
-O aplicativo utiliza **Inteligência Artificial** para simplificar o entendimento das cartas e permite que o usuário mantenha seus decks organizados diretamente no celular.
-
----
 <p align="center">
   <a href="https://github.com/Mcfl-ly/Consultor-magic/releases/tag/v1.0">
     <img src="https://img.shields.io/badge/⬇️_Download_APK-success?style=for-the-badge">
@@ -20,6 +13,14 @@ O aplicativo utiliza **Inteligência Artificial** para simplificar o entendiment
     <img src="https://img.shields.io/badge/LinkedIn-Perfil-0A66C2?style=for-the-badge&logo=linkedin">
   </a>
 </p>
+# 🃏 DeckMind
+
+DeckMind é um aplicativo mobile desenvolvido para jogadores de **Magic: The Gathering**, especialmente para quem está começando no jogo.
+
+O aplicativo utiliza **Inteligência Artificial** para simplificar o entendimento das cartas e permite que o usuário mantenha seus decks organizados diretamente no celular.
+
+---
+
 
 ## 📱 Funcionalidades
 
