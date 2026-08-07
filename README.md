@@ -125,7 +125,7 @@ npx expo start
 
 Caso você queira apenas utilizar o aplicativo, basta baixar o APK disponível abaixo:
 
-> **🔗 [(Adicionar link para download do APK aqui)](https://github.com/Mcfl-ly/Consultor-magic/releases/tag/v1.0)**
+> **🔗 [Baixe Aqui a Primeira Versão!](https://github.com/Mcfl-ly/Consultor-magic/releases/tag/v1.0)**
 
 ---
 
