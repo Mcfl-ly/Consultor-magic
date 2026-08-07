@@ -27,7 +27,7 @@ Quando uma imagem é utilizada, o aplicativo emprega **OCR (Reconhecimento Ópti
 
 ### 🎥 Demonstração
 
-> **(Adicionar GIF da pesquisa de cartas aqui)**
+> **![Demonstração do DeckMind](assets/pesquisa.gif)**
 
 ---
 
