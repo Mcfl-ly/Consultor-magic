@@ -11,6 +11,15 @@ DeckMind é um aplicativo mobile desenvolvido para jogadores de **Magic: The Gat
 O aplicativo utiliza **Inteligência Artificial** para simplificar o entendimento das cartas e permite que o usuário mantenha seus decks organizados diretamente no celular.
 
 ---
+<p align="center">
+  <a href="https://github.com/SEU-USUARIO/DeckMind/releases/latest">
+    <img src="https://img.shields.io/badge/⬇️_Download_APK-success?style=for-the-badge">
+  </a>
+
+  <a href="https://www.linkedin.com/in/SEU-LINKEDIN">
+    <img src="https://img.shields.io/badge/LinkedIn-Perfil-0A66C2?style=for-the-badge&logo=linkedin">
+  </a>
+</p>
 
 ## 📱 Funcionalidades
 
