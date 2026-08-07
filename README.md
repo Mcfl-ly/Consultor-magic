@@ -13,3 +13,12 @@
 </p>
 
 Aplicativo mobile para jogadores de **Magic: The Gathering** que utiliza **OCR** e **Gemini AI** para simplificar a leitura de cartas e auxiliar no gerenciamento de decks.
+
+
+![GitHub last commit](https://img.shields.io/github/last-commit/SEU-USUARIO/DeckMind?style=for-the-badge)
+
+![GitHub Repo stars](https://img.shields.io/github/stars/SEU-USUARIO/DeckMind?style=for-the-badge)
+
+![GitHub forks](https://img.shields.io/github/forks/SEU-USUARIO/DeckMind?style=for-the-badge)
+
+![GitHub issues](https://img.shields.io/github/issues/SEU-USUARIO/DeckMind?style=for-the-badge)
